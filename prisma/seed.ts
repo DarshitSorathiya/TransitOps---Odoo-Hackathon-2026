@@ -1,4 +1,4 @@
-import { PrismaClient, UserStatus, VehicleType, VehicleStatus, FuelType, DriverStatus, TripStatus, MaintenanceType, MaintenanceStatus, ExpenseCategory, ExpenseStatus } from '@prisma/client';
+import { PrismaClient, UserStatus, VehicleType, VehicleStatus, FuelType, DriverStatus, TripStatus, MaintenanceType, MaintenanceStatus, MaintenancePriority, ExpenseCategory, ExpenseStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -203,10 +203,14 @@ async function main() {
     data: {
       vehicleId: vehicle1.id,
       driverId: driver1.id,
+      title: 'Regular Engine Service',
+      description: 'Regular engine oil and filter change. Brake pad thickness inspection.',
+      priority: MaintenancePriority.LOW,
       type: MaintenanceType.PREVENTIVE,
       status: MaintenanceStatus.COMPLETED,
-      description: 'Regular engine oil and filter change. Brake pad thickness inspection.',
-      cost: 450.00,
+      technician: 'Alice Mechanic',
+      estimatedCost: 450.00,
+      actualCost: 450.00,
       odometer: 142000.0,
       startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       endDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000 + 4 * 60 * 60 * 1000), // 4 hours later
@@ -216,10 +220,14 @@ async function main() {
   await prisma.maintenance.create({
     data: {
       vehicleId: vehicle2.id,
-      type: MaintenanceType.INSPECTION,
-      status: MaintenanceStatus.SCHEDULED,
+      title: 'Battery Inspection',
       description: 'Annual electrical drivetrain and battery degradation inspection.',
-      cost: 0.00,
+      priority: MaintenancePriority.MEDIUM,
+      type: MaintenanceType.INSPECTION,
+      status: MaintenanceStatus.PENDING,
+      technician: 'Bob EV Tech',
+      estimatedCost: 150.00,
+      actualCost: null,
       odometer: 12450.2,
       startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
     },
@@ -245,14 +253,17 @@ async function main() {
   // 9. Create Trips
   const trip = await prisma.trip.create({
     data: {
+      tripNumber: 'TRIP-1001',
       vehicleId: vehicle1.id,
       driverId: driver1.id,
       dispatcherId: manager.id, // Referencing manager user as dispatcher
-      status: TripStatus.SCHEDULED,
+      status: TripStatus.DISPATCHED,
       startLocation: 'Dallas Logistics Hub, TX',
       endLocation: 'Houston Port Terminal, TX',
       plannedDeparture: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
       plannedArrival: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000 + 5 * 60 * 60 * 1000), // 5 hours trip
+      cargoWeight: 12000.0,
+      plannedDistance: 240.5,
       notes: 'Contains perishable food items. Refrigeration system must remain active.',
     },
   });
