@@ -38,7 +38,7 @@ export function MaintenanceModal({
   editingMaintenance,
   isLoadingSubmit,
 }: MaintenanceModalProps) {
-  // 1. Fetch vehicles for selection
+  // Fetch vehicles for selection
   const { data: vehiclesData, isLoading: isLoadingVehicles } = useQuery({
     queryKey: ['available-vehicles-list'],
     queryFn: async () => {
@@ -49,7 +49,7 @@ export function MaintenanceModal({
     enabled: isOpen,
   });
 
-  // 2. Fetch drivers for selection
+  // Fetch drivers for selection
   const { data: driversData, isLoading: isLoadingDrivers } = useQuery({
     queryKey: ['available-drivers-list'],
     queryFn: async () => {
