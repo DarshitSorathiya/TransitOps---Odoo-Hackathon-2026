@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { MaintenanceType, MaintenanceStatus, MaintenancePriority, Maintenance, Vehicle, Driver, User } from '@prisma/client';
+import { MaintenanceType, MaintenancePriority, Maintenance, Driver } from '@prisma/client';
 
 export type MaintenanceWithDetails = Maintenance & {
   vehicle: {
