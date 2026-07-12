@@ -1,7 +1,17 @@
 import { PrismaClient, UserRole, UserStatus, VehicleType, VehicleStatus, FuelType, DriverStatus, TripStatus, MaintenanceType, MaintenanceStatus, ExpenseCategory, ExpenseStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error('DATABASE_URL is not defined in the environment.');
+}
+
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log('Seeding database starting...');
@@ -87,6 +97,7 @@ async function main() {
       status: DriverStatus.AVAILABLE,
       phoneNumber: '+1 (555) 123-4567',
       emergencyContact: 'Jane Doe (+1 (555) 123-4560)',
+      safetyScore: 94.5,
     },
   });
 
@@ -99,6 +110,7 @@ async function main() {
       status: DriverStatus.AVAILABLE,
       phoneNumber: '+1 (555) 987-6543',
       emergencyContact: 'John Smith (+1 (555) 987-6540)',
+      safetyScore: 98.2,
     },
   });
 
@@ -113,11 +125,13 @@ async function main() {
       vin: '1FVACWDB3NH123456',
       licensePlate: 'TX-FL-9988',
       type: VehicleType.TRUCK,
-      status: VehicleStatus.ACTIVE,
+      status: VehicleStatus.AVAILABLE,
       fuelType: FuelType.DIESEL,
       odometer: 145000.5,
       payloadCapacity: 15000.0, // 15 tons
       insuranceExpiry: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 3 months expiry
+      acquisitionCost: 125000.00,
+      acquisitionDate: new Date('2022-04-12'),
     },
   });
 
@@ -129,11 +143,13 @@ async function main() {
       vin: '1FTBW1EV5NKA654321',
       licensePlate: 'CA-EV-4422',
       type: VehicleType.VAN,
-      status: VehicleStatus.ACTIVE,
+      status: VehicleStatus.AVAILABLE,
       fuelType: FuelType.ELECTRIC,
       odometer: 12450.2,
       payloadCapacity: 1600.0, // 1.6 tons
       insuranceExpiry: new Date(Date.now() + 150 * 24 * 60 * 60 * 1000), // 5 months expiry
+      acquisitionCost: 55000.00,
+      acquisitionDate: new Date('2023-08-19'),
     },
   });
 
