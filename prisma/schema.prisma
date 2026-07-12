@@ -6,14 +6,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum UserRole {
-  ADMIN
-  FLEET_MANAGER
-  DISPATCHER
-  DRIVER
-  MAINTENANCE_STAFF
-}
-
 enum UserStatus {
   ACTIVE
   INACTIVE
@@ -148,7 +140,6 @@ model User {
   emailVerified DateTime?
   image         String?
   passwordHash  String?      // Nullable for SSO/OAuth signins
-  role          UserRole     @default(FLEET_MANAGER)
   status        UserStatus   @default(ACTIVE)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
@@ -162,9 +153,9 @@ model User {
   notifications Notification[]
   generatedReports Report[]
   approvedExpenses Expense[]   @relation("ExpenseApprover")
+  roles         UserRole[]
 
   @@index([email])
-  @@index([role])
 }
 
 // Driver profile linked to User accounts (or stands alone)
@@ -364,4 +355,27 @@ model Report {
   generatedBy    User       @relation(fields: [generatedById], references: [id], onDelete: Cascade)
 
   @@index([generatedById])
+}
+
+model Role {
+  id          String     @id @default(uuid()) @db.Uuid
+  name        String     @unique // e.g., "ADMIN", "FLEET_MANAGER", "DRIVER", "SAFETY_OFFICER", "FINANCIAL_ANALYST"
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  userRoles   UserRole[]
+}
+
+model UserRole {
+  userId    String   @db.Uuid
+  roleId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
 }

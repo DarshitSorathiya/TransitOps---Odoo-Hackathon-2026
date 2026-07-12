@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, UserStatus, VehicleType, VehicleStatus, FuelType, DriverStatus, TripStatus, MaintenanceType, MaintenanceStatus, ExpenseCategory, ExpenseStatus } from '@prisma/client';
+import { PrismaClient, UserStatus, VehicleType, VehicleStatus, FuelType, DriverStatus, TripStatus, MaintenanceType, MaintenanceStatus, ExpenseCategory, ExpenseStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -17,6 +17,8 @@ async function main() {
   await prisma.driver.deleteMany({});
   await prisma.account.deleteMany({});
   await prisma.session.deleteMany({});
+  await prisma.userRole.deleteMany({});
+  await prisma.role.deleteMany({});
   await prisma.user.deleteMany({});
   await prisma.vehicle.deleteMany({});
 
@@ -24,13 +26,35 @@ async function main() {
 
   const passwordHash = await bcrypt.hash('Password@123', 10);
 
-  // 2. Create Users
+  // 2. Create dynamic Roles
+  const adminRole = await prisma.role.create({
+    data: { name: 'ADMIN', description: 'System Administrator with full access' },
+  });
+
+  const managerRole = await prisma.role.create({
+    data: { name: 'FLEET_MANAGER', description: 'Fleet Operations Manager' },
+  });
+
+  const driverRole = await prisma.role.create({
+    data: { name: 'DRIVER', description: 'Vehicle Fleet Driver' },
+  });
+
+  const safetyRole = await prisma.role.create({
+    data: { name: 'SAFETY_OFFICER', description: 'Safety & Compliance Officer' },
+  });
+
+  const financeRole = await prisma.role.create({
+    data: { name: 'FINANCIAL_ANALYST', description: 'Expenses & Budget Analyst' },
+  });
+
+  console.log('Roles created.');
+
+  // 3. Create Users
   const admin = await prisma.user.create({
     data: {
       name: 'System Admin',
       email: 'admin@transitops.com',
       passwordHash,
-      role: UserRole.ADMIN,
       status: UserStatus.ACTIVE,
     },
   });
@@ -40,17 +64,24 @@ async function main() {
       name: 'Fleet Manager Alex',
       email: 'manager@transitops.com',
       passwordHash,
-      role: UserRole.FLEET_MANAGER,
       status: UserStatus.ACTIVE,
     },
   });
 
-  const dispatcher = await prisma.user.create({
+  const safety = await prisma.user.create({
     data: {
-      name: 'Dispatcher Chloe',
-      email: 'dispatcher@transitops.com',
+      name: 'Safety Officer Chloe',
+      email: 'safety@transitops.com',
       passwordHash,
-      role: UserRole.DISPATCHER,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const finance = await prisma.user.create({
+    data: {
+      name: 'Finance Analyst Frank',
+      email: 'finance@transitops.com',
+      passwordHash,
       status: UserStatus.ACTIVE,
     },
   });
@@ -60,7 +91,6 @@ async function main() {
       name: 'Driver Michael',
       email: 'michael.driver@transitops.com',
       passwordHash,
-      role: UserRole.DRIVER,
       status: UserStatus.ACTIVE,
     },
   });
@@ -70,14 +100,27 @@ async function main() {
       name: 'Driver Sarah',
       email: 'sarah.driver@transitops.com',
       passwordHash,
-      role: UserRole.DRIVER,
       status: UserStatus.ACTIVE,
     },
   });
 
   console.log('Users created.');
 
-  // 3. Create Drivers
+  // 4. Map Users to Roles inside join table
+  await prisma.userRole.createMany({
+    data: [
+      { userId: admin.id, roleId: adminRole.id },
+      { userId: manager.id, roleId: managerRole.id },
+      { userId: safety.id, roleId: safetyRole.id },
+      { userId: finance.id, roleId: financeRole.id },
+      { userId: driverUser1.id, roleId: driverRole.id },
+      { userId: driverUser2.id, roleId: driverRole.id },
+    ],
+  });
+
+  console.log('User roles mapped.');
+
+  // 5. Create Drivers profiles
   const driver1 = await prisma.driver.create({
     data: {
       userId: driverUser1.id,
@@ -104,7 +147,7 @@ async function main() {
 
   console.log(`Driver profiles created for ${driver1.licenseNumber} and ${driver2.licenseNumber}.`);
 
-  // 4. Create Vehicles
+  // 6. Create Vehicles
   const vehicle1 = await prisma.vehicle.create({
     data: {
       make: 'Freightliner',
@@ -139,7 +182,7 @@ async function main() {
 
   console.log('Vehicles created.');
 
-  // 5. Create Maintenance records
+  // 7. Create Maintenance records
   await prisma.maintenance.create({
     data: {
       vehicleId: vehicle1.id,
@@ -168,7 +211,7 @@ async function main() {
 
   console.log('Maintenance records created.');
 
-  // 6. Create Fuel logs
+  // 8. Create Fuel logs
   await prisma.fuelLog.create({
     data: {
       vehicleId: vehicle1.id,
@@ -183,12 +226,12 @@ async function main() {
 
   console.log('Fuel logs created.');
 
-  // 7. Create Trips
+  // 9. Create Trips
   const trip = await prisma.trip.create({
     data: {
       vehicleId: vehicle1.id,
       driverId: driver1.id,
-      dispatcherId: dispatcher.id,
+      dispatcherId: manager.id, // Referencing manager user as dispatcher
       status: TripStatus.SCHEDULED,
       startLocation: 'Dallas Logistics Hub, TX',
       endLocation: 'Houston Port Terminal, TX',
@@ -200,7 +243,7 @@ async function main() {
 
   console.log('Trips created.');
 
-  // 8. Create Expenses
+  // 10. Create Expenses
   await prisma.expense.create({
     data: {
       vehicleId: vehicle1.id,
@@ -217,12 +260,12 @@ async function main() {
 
   console.log('Expenses created.');
 
-  // 9. Create Activity Logs
+  // 11. Create Activity Logs
   await prisma.activityLog.create({
     data: {
       userId: admin.id,
       action: 'SYSTEM_INITIALIZATION',
-      details: { message: 'Database was successfully seeded with mock entries.' },
+      details: { message: 'Database was successfully seeded with dynamic roles.' },
     },
   });
 
