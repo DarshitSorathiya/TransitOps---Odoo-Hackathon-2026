@@ -1,0 +1,367 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  ADMIN
+  FLEET_MANAGER
+  DISPATCHER
+  DRIVER
+  MAINTENANCE_STAFF
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum VehicleType {
+  TRUCK
+  VAN
+  CAR
+  BUS
+}
+
+enum VehicleStatus {
+  ACTIVE
+  MAINTENANCE
+  OUT_OF_SERVICE
+  ON_TRIP
+}
+
+enum FuelType {
+  DIESEL
+  PETROL
+  ELECTRIC
+  HYBRID
+}
+
+enum DriverStatus {
+  AVAILABLE
+  ON_TRIP
+  ON_LEAVE
+  SUSPENDED
+}
+
+enum TripStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  INSPECTION
+  EMERGENCY
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ExpenseCategory {
+  TOLL
+  FOOD
+  LODGING
+  PARKING
+  PERMITS
+  FUEL
+  MAINTENANCE
+  MISC
+}
+
+enum ExpenseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ALERT
+  CRITICAL
+}
+
+enum ReportType {
+  FLEET
+  TRIP
+  FUEL
+  EXPENSE
+  MAINTENANCE
+}
+
+// NextAuth Models
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Custom Platform User
+model User {
+  id            String       @id @default(uuid()) @db.Uuid
+  name          String?
+  email         String?      @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?      // Nullable for SSO/OAuth signins
+  role          UserRole     @default(FLEET_MANAGER)
+  status        UserStatus   @default(ACTIVE)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?    // Soft delete
+
+  accounts      Account[]
+  sessions      Session[]
+  driverProfile Driver?
+  dispatchedTrips Trip[]      @relation("DispatcherTrips")
+  activityLogs  ActivityLog[]
+  notifications Notification[]
+  generatedReports Report[]
+  approvedExpenses Expense[]   @relation("ExpenseApprover")
+
+  @@index([email])
+  @@index([role])
+}
+
+// Driver profile linked to User accounts (or stands alone)
+model Driver {
+  id               String       @id @default(uuid()) @db.Uuid
+  userId           String?      @unique @db.Uuid // Nullable if driver doesn't log into the app
+  licenseNumber    String       @unique
+  licenseClass     String
+  licenseExpiry    DateTime
+  status           DriverStatus @default(AVAILABLE)
+  phoneNumber      String
+  emergencyContact String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?    // Soft delete
+
+  user             User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  trips            Trip[]
+  maintenanceReports Maintenance[] @relation("DriverMaintenanceReports")
+  fuelLogs         FuelLog[]
+  expenses         Expense[]
+
+  @@index([status])
+}
+
+// Vehicle registry
+model Vehicle {
+  id               String        @id @default(uuid()) @db.Uuid
+  make             String
+  model            String
+  year             Int
+  vin              String        @unique
+  licensePlate     String        @unique
+  type             VehicleType
+  status           VehicleStatus @default(ACTIVE)
+  fuelType         FuelType
+  odometer         Float
+  payloadCapacity  Float         // In kg or tons
+  insuranceExpiry  DateTime
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?     // Soft delete
+
+  trips            Trip[]
+  maintenanceLogs  Maintenance[]
+  fuelLogs         FuelLog[]
+  expenses         Expense[]
+
+  @@index([status])
+  @@index([licensePlate])
+}
+
+// Trip records
+model Trip {
+  id               String     @id @default(uuid()) @db.Uuid
+  vehicleId        String     @db.Uuid
+  driverId         String     @db.Uuid
+  dispatcherId     String     @db.Uuid
+  status           TripStatus @default(SCHEDULED)
+  startLocation    String
+  endLocation      String
+  plannedDeparture DateTime
+  plannedArrival   DateTime
+  actualDeparture  DateTime?
+  actualArrival    DateTime?
+  startOdometer    Float?
+  endOdometer      Float?
+  distance         Float?     // In km/miles
+  routePath        Json?      // Store geo-coordinates (waypoints) as JSON
+  notes            String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  deletedAt        DateTime?  // Soft delete
+
+  vehicle          Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  driver           Driver     @relation(fields: [driverId], references: [id], onDelete: Restrict)
+  dispatcher       User       @relation("DispatcherTrips", fields: [dispatcherId], references: [id], onDelete: Restrict)
+  expenses         Expense[]
+
+  @@index([vehicleId])
+  @@index([driverId])
+  @@index([status])
+}
+
+// Maintenance operations
+model Maintenance {
+  id             String            @id @default(uuid()) @db.Uuid
+  vehicleId      String            @db.Uuid
+  driverId       String?           @db.Uuid // Optional, if driver reported it
+  technicianId   String?           @db.Uuid // Optional system user assigned to perform it
+  type           MaintenanceType
+  status         MaintenanceStatus @default(SCHEDULED)
+  description    String
+  cost           Decimal           @db.Decimal(10, 2)
+  odometer       Float             // Odometer at service time
+  startDate      DateTime
+  endDate        DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  vehicle        Vehicle           @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver         Driver?           @relation("DriverMaintenanceReports", fields: [driverId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId])
+  @@index([status])
+}
+
+// Fuel Fill-up logs
+model FuelLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  vehicleId   String   @db.Uuid
+  driverId    String   @db.Uuid
+  date        DateTime
+  odometer    Float
+  fuelAmount  Decimal  @db.Decimal(10, 2) // Liters or Gallons
+  cost        Decimal  @db.Decimal(10, 2)
+  fuelStation String?
+  receiptUrl  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  driver      Driver   @relation(fields: [driverId], references: [id], onDelete: Restrict)
+
+  @@index([vehicleId])
+  @@index([driverId])
+}
+
+// Enterprise Expense tracking (tolls, meals, repairs, fuel, etc)
+model Expense {
+  id           String          @id @default(uuid()) @db.Uuid
+  vehicleId    String?         @db.Uuid
+  driverId     String?         @db.Uuid
+  tripId       String?         @db.Uuid
+  category     ExpenseCategory
+  amount       Decimal         @db.Decimal(10, 2)
+  date         DateTime
+  description  String
+  receiptUrl   String?
+  status       ExpenseStatus   @default(PENDING)
+  approvedById String?         @db.Uuid
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  vehicle      Vehicle?        @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  driver       Driver?         @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  trip         Trip?           @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  approvedBy   User?           @relation("ExpenseApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId])
+  @@index([driverId])
+  @@index([tripId])
+  @@index([status])
+}
+
+// In-app & Event notification system
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+// Platform Auditing Logs
+model ActivityLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  action    String   // e.g., "VEHICLE_CREATED", "TRIP_STARTED"
+  details   Json?    // Structured payload of old vs new states
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+}
+
+// On-demand generated reports (PDF, CSV links stored)
+model Report {
+  id             String     @id @default(uuid()) @db.Uuid
+  name           String
+  type           ReportType
+  generatedById  String     @db.Uuid
+  format         String     // "PDF" or "CSV"
+  fileUrl        String
+  createdAt      DateTime   @default(now())
+
+  generatedBy    User       @relation(fields: [generatedById], references: [id], onDelete: Cascade)
+
+  @@index([generatedById])
+}
