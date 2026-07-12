@@ -2,62 +2,62 @@
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #09090b;
+    --background: #f8fafc;
+    --foreground: #0f172a;
     --card: #ffffff;
-    --card-foreground: #09090b;
+    --card-foreground: #0f172a;
     --popover: #ffffff;
-    --popover-foreground: #09090b;
-    --primary: #0f0f11;
-    --primary-foreground: #fafafa;
-    --secondary: #f4f4f5;
-    --secondary-foreground: #18181b;
-    --muted: #f4f4f5;
-    --muted-foreground: #71717a;
-    --accent: #f4f4f5;
-    --accent-foreground: #18181b;
+    --popover-foreground: #0f172a;
+    --primary: #0f172a;
+    --primary-foreground: #ffffff;
+    --secondary: #f1f5f9;
+    --secondary-foreground: #0f172a;
+    --muted: #f1f5f9;
+    --muted-foreground: #64748b;
+    --accent: #f1f5f9;
+    --accent-foreground: #0f172a;
     --destructive: #ef4444;
-    --destructive-foreground: #fafafa;
-    --border: #e4e4e7;
-    --input: #e4e4e7;
-    --ring: #18181b;
-    --radius: 0.6rem;
+    --destructive-foreground: #ffffff;
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: #4f46e5;
+    --radius: 0.75rem;
 
-    /* Extra variables for premium Linear-like feel */
-    --brand: #6366f1; /* Indigo brand */
-    --brand-hover: #4f46e5;
-    --sidebar: #fafafa;
-    --sidebar-border: #e4e4e7;
-    --sidebar-hover: #f4f4f5;
+    /* Light mode custom brand adjustments */
+    --brand: #4f46e5;
+    --brand-hover: #3730a3;
+    --sidebar: #f8fafc;
+    --sidebar-border: #e2e8f0;
+    --sidebar-hover: #f1f5f9;
   }
 
   .dark {
-    --background: #030303;
-    --foreground: #f4f4f5;
-    --card: #09090b;
-    --card-foreground: #f4f4f5;
-    --popover: #09090b;
-    --popover-foreground: #f4f4f5;
-    --primary: #fafafa;
-    --primary-foreground: #09090b;
-    --secondary: #18181b;
-    --secondary-foreground: #fafafa;
-    --muted: #161618;
-    --muted-foreground: #8e8e93;
-    --accent: #1c1c1e;
-    --accent-foreground: #f4f4f5;
-    --destructive: #ea580c;
-    --destructive-foreground: #fafafa;
-    --border: #1f1f23;
-    --input: #1f1f23;
-    --ring: #a1a1aa;
+    --background: #020206;
+    --foreground: #f8fafc;
+    --card: #08080f;
+    --card-foreground: #f8fafc;
+    --popover: #08080f;
+    --popover-foreground: #f8fafc;
+    --primary: #f8fafc;
+    --primary-foreground: #020206;
+    --secondary: #0f101b;
+    --secondary-foreground: #f8fafc;
+    --muted: #0d0e19;
+    --muted-foreground: #94a3b8;
+    --accent: #131427;
+    --accent-foreground: #f8fafc;
+    --destructive: #f43f5e;
+    --destructive-foreground: #f8fafc;
+    --border: #141629;
+    --input: #141629;
+    --ring: #6366f1;
 
-    /* Dark mode premium feel adjustments */
+    /* Custom designer branding colours */
     --brand: #818cf8;
-    --brand-hover: #6366f1;
-    --sidebar: #050507;
-    --sidebar-border: #16161a;
-    --sidebar-hover: #121215;
+    --brand-hover: #4f46e5;
+    --sidebar: #040409;
+    --sidebar-border: #0e1022;
+    --sidebar-hover: #0a0b16;
   }
 }
 
@@ -91,7 +91,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-hover: var(--sidebar-hover);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
@@ -136,3 +136,51 @@
   backdrop-filter: blur(12px) saturate(120%);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
+
+/* Premium micro-interactions, glow animations, and gradients */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+}
+
+.dark .glass-premium {
+  background: rgba(8, 8, 15, 0.65);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+@keyframes neon-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(99, 102, 241, 0.15), 0 0 10px rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.35), 0 0 20px rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.45);
+  }
+}
+
+.glowing-card {
+  animation: neon-pulse 4s infinite ease-in-out;
+}
+
+.dark .glowing-card {
+  background: linear-gradient(135deg, rgba(12, 13, 29, 0.7) 0%, rgba(6, 6, 12, 0.9) 100%);
+}
+
+/* Smooth brand gradient text */
+.gradient-text-indigo {
+  background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-emerald {
+  background: linear-gradient(135deg, #34d399 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+

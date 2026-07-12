@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Truck, Users, Navigation, LogOut, ChevronLeft, ChevronRight, Menu, X, Sun, Moon } from 'lucide-react';
+import { Truck, Users, Navigation, LogOut, ChevronLeft, ChevronRight, Menu, X, Sun, Moon, Wrench, LayoutDashboard, Zap, CreditCard, BarChart2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -16,9 +16,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const menuItems = [
+    { name: 'Control Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Vehicle Registry', href: '/vehicles', icon: Truck },
     { name: 'Driver Profiles', href: '/drivers', icon: Users },
     { name: 'Trips Dispatch', href: '/trips', icon: Navigation },
+    { name: 'Maintenance Dispatch', href: '/maintenance', icon: Wrench },
+    { name: 'Fuel Logs', href: '/fuel', icon: Zap },
+    { name: 'Expense Audits', href: '/expenses', icon: CreditCard },
+    { name: 'Fleet Analytics', href: '/analytics', icon: BarChart2 },
   ];
 
   const user = session?.user;
