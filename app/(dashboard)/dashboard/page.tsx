@@ -106,23 +106,23 @@ export default function CentralDashboard() {
     <div className="p-6 max-w-7xl mx-auto space-y-8 text-foreground min-h-screen">
       
       {/* Welcome Banner */}
-      <div className="relative rounded-2xl border border-indigo-500/20 bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-indigo-500/5 p-6 overflow-hidden shadow-lg backdrop-blur-md glowing-card">
+      <div className="relative rounded-3xl bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-indigo-500/5 p-8 overflow-hidden shadow-xl glowing-card">
         <div className="absolute top-0 right-0 h-40 w-40 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-indigo-400" />
-              <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400 font-mono">Operations Control Panel</span>
+              <span className="text-[11px] uppercase font-bold tracking-widest text-indigo-400 font-mono">Operations Control Panel</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
               Welcome back, <span className="gradient-text-indigo">{user?.name || 'Dispatcher'}</span>
             </h1>
-            <p className="text-xs text-muted-foreground max-w-lg leading-relaxed">
+            <p className="text-sm text-muted-foreground max-w-lg leading-relaxed font-medium">
               Monitor active transit routes, verify compliance milestones, and dispatch drivers to shop schedules.
             </p>
           </div>
-          <div className="flex items-center gap-1 bg-indigo-600/15 border border-indigo-500/35 px-3 py-1.5 rounded-lg text-indigo-300 font-mono text-[10px] uppercase font-bold shadow-md shadow-indigo-950/40">
-            <Activity className="h-3.5 w-3.5 animate-pulse text-indigo-400" />
+          <div className="flex items-center gap-1.5 bg-indigo-600/10 px-4 py-2 rounded-xl text-indigo-300 font-mono text-[11px] uppercase font-bold shadow-sm">
+            <Activity className="h-4 w-4 animate-pulse text-indigo-400" />
             Live Database Connected
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function CentralDashboard() {
 
       {/* Active Operations Grid */}
       <div className="space-y-3">
-        <h2 className="text-xs font-extrabold text-muted-foreground uppercase tracking-widest block">Active Operations</h2>
+        <h2 className="text-sm font-extrabold text-muted-foreground uppercase tracking-widest block pl-1">Active Operations</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {modules.map((mod, idx) => {
             const Icon = mod.icon;
@@ -141,45 +141,45 @@ export default function CentralDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: idx * 0.05 }}
                 whileHover={{ y: -4, transition: { duration: 0.15 } }}
-                className="rounded-xl border border-border/40 p-5 flex flex-col justify-between h-48 glass-premium shadow-sm relative group hover:border-indigo-500/30 hover:shadow-lg hover:shadow-indigo-500/5 transition-all"
+                className="rounded-2xl p-6 flex flex-col justify-between h-52 glass-premium shadow-md relative group hover:shadow-xl hover:shadow-indigo-500/5 transition-all"
               >
                 <div>
                   <div className="flex justify-between items-start">
-                    <span className="text-[9px] uppercase tracking-wider font-extrabold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/25">
+                    <span className="text-[10px] uppercase tracking-wider font-extrabold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded">
                       {mod.badge}
                     </span>
-                    <div className={`p-2 rounded-lg border ${mod.color}`}>
+                    <div className={`p-2.5 rounded-xl ${mod.color}`}>
                       <Icon className="h-4 w-4" />
                     </div>
                   </div>
-                  <h3 className="text-base font-bold text-foreground mt-4 group-hover:text-indigo-400 transition-colors">
+                  <h3 className="text-lg font-bold text-foreground mt-4 group-hover:text-indigo-400 transition-colors">
                     {mod.title}
                   </h3>
-                  <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed line-clamp-2">
+                  <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-2 font-medium">
                     {mod.desc}
                   </p>
                 </div>
 
-                <div className="flex justify-between items-center mt-4 pt-3 border-t border-border/20">
+                <div className="flex justify-between items-center mt-4 pt-3 border-t border-muted/20">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-lg font-extrabold tracking-tight text-foreground font-mono">
+                    <span className="text-xl font-extrabold tracking-tight text-foreground font-mono">
                       {isLoadingVehicles || isLoadingDrivers || isLoadingTrips || isLoadingMaintenance ? (
                         <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                       ) : (
                         mod.count
                       )}
                     </span>
-                    <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider">
+                    <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
                       {mod.countLabel || 'Total'}
                     </span>
                   </div>
 
                   <Link
                     href={mod.href}
-                    className="flex items-center gap-1 text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wider"
+                    className="flex items-center gap-1 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-wider"
                   >
                     Manage
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>
               </motion.div>
@@ -190,7 +190,7 @@ export default function CentralDashboard() {
 
       {/* Coming Soon / Roadmap Section */}
       <div className="space-y-3 pt-4">
-        <h2 className="text-xs font-extrabold text-muted-foreground uppercase tracking-widest block">Upcoming Extensions</h2>
+        <h2 className="text-sm font-extrabold text-muted-foreground uppercase tracking-widest block pl-1">Upcoming Extensions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {comingSoonModules.map((item, idx) => {
             const Icon = item.icon;
@@ -201,21 +201,21 @@ export default function CentralDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: (idx + 4) * 0.05 }}
                 whileHover={{ y: -2 }}
-                className="rounded-xl border border-border/30 bg-card/10 p-5 flex flex-col justify-between h-40 opacity-75 hover:opacity-95 transition-all hover:border-indigo-500/20 glass"
+                className="rounded-2xl bg-card/45 p-6 flex flex-col justify-between h-44 opacity-80 hover:opacity-95 transition-all shadow-sm hover:shadow-md"
               >
                 <div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[9px] text-indigo-400 font-bold uppercase tracking-widest font-mono">
+                    <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest font-mono">
                       {item.badge}
                     </span>
-                    <Icon className="h-4 w-4 text-muted-foreground/60" />
+                    <Icon className="h-4.5 w-4.5 text-muted-foreground/60" />
                   </div>
-                  <h3 className="text-sm font-bold text-foreground mt-3">{item.title}</h3>
-                  <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
+                  <h3 className="text-base font-bold text-foreground mt-3">{item.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed font-medium">
                     {item.desc}
                   </p>
                 </div>
-                <div className="text-[10px] text-indigo-400/60 font-semibold tracking-wider uppercase font-mono">
+                <div className="text-[11px] text-indigo-400/60 font-semibold tracking-wider uppercase font-mono">
                   🛠 Under Construction
                 </div>
               </motion.div>
