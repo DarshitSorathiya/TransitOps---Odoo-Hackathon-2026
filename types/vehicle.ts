@@ -12,9 +12,9 @@ export const vehicleSchema = z.object({
   fuelType: z.nativeEnum(FuelType),
   odometer: z.coerce.number().min(0, 'Odometer cannot be negative.'),
   payloadCapacity: z.coerce.number().min(0, 'Payload capacity must be positive.'),
-  insuranceExpiry: z.coerce.string().transform((val) => new Date(val)),
+  insuranceExpiry: z.coerce.date(),
   acquisitionCost: z.coerce.number().min(0, 'Acquisition cost must be positive.'),
-  acquisitionDate: z.coerce.string().transform((val) => new Date(val)),
+  acquisitionDate: z.coerce.date(),
 });
 
 export type VehicleFormValues = z.infer<typeof vehicleSchema>;

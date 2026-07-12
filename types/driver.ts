@@ -5,7 +5,7 @@ export const driverSchema = z.object({
   userId: z.string().uuid('Invalid user mapping ID.').nullable().optional(),
   licenseNumber: z.string().min(5, 'License number must be at least 5 characters.'),
   licenseClass: z.string().min(2, 'License category class must be specified.'),
-  licenseExpiry: z.coerce.string().transform((val) => new Date(val)),
+  licenseExpiry: z.coerce.date(),
   status: z.nativeEnum(DriverStatus).default(DriverStatus.AVAILABLE),
   phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits.'),
   emergencyContact: z.string().optional().nullable(),
